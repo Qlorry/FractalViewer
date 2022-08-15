@@ -39,7 +39,8 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 	ImGui::Begin("Fractal Settings", nullptr, m_wnd_flags);
 
 	ImGui::InputDouble("Input zoom x", &x_zoom, 10.f, 100.0f, "%.0f");
-	ImGui::InputDouble("Input zoom y", &y_zoom, 10.f, 100.0f, "%.0f");
+	if (!equalize_zooms)
+		ImGui::InputDouble("Input zoom y", &y_zoom, 10.f, 100.0f, "%.0f");
 	ImGui::Checkbox("Equalize zooms", &equalize_zooms);
 
 	ImGui::Spacing();
@@ -79,7 +80,7 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 	if (ImGui::Button("Apply") || apply_on_fly || ImGui::IsKeyDown(525))
 	{
 		prev.zoom_x = x_zoom;
-		prev.zoom_y = y_zoom;
+		prev.zoom_y = equalize_zooms ? x_zoom : y_zoom;
 		prev.colours.clear();
 
 		for (auto& [percent, col] : percent_colours)
