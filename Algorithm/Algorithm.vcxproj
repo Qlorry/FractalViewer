@@ -32,6 +32,7 @@
     <ProjectGuid>{473dd4af-0ee9-4d6e-b94d-605ee1456829}</ProjectGuid>
     <RootNamespace>Algorithm</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>Generator</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -211,14 +212,16 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="include\FractalGenerator\Colour.hpp" />
+    <ClInclude Include="include\FractalGenerator\Colour.h" />
     <ClInclude Include="include\FractalGenerator\CoordHelper.h" />
-    <ClInclude Include="include\FractalGenerator\FractalGenerator.hpp" />
+    <ClInclude Include="include\FractalGenerator\CPUService.h" />
+    <ClInclude Include="include\FractalGenerator\FractalAlgo.h" />
+    <ClInclude Include="include\FractalGenerator\FractalGenerator.h" />
     <ClInclude Include="include\FractalGenerator\FractalParams.h" />
     <ClInclude Include="include\FractalGenerator\GPUService.h" />
     <ClInclude Include="include\FractalGenerator\Histogram.h" />
     <ClInclude Include="include\FractalGenerator\Image.h" />
-    <ClInclude Include="include\FractalGenerator\Mandelbrot.hpp" />
+    <ClInclude Include="include\FractalGenerator\Mandelbrot.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -232,6 +235,7 @@
     </ClCompile>
     <ClCompile Include="src\Colour.cpp" />
     <ClCompile Include="src\CoordHelper.cpp" />
+    <ClCompile Include="src\CPUService.cpp" />
     <ClCompile Include="src\FractalGenerator.cpp" />
     <ClCompile Include="src\GPUService.cpp" />
     <ClCompile Include="src\Histogram.cpp" />

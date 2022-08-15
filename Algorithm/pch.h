@@ -8,6 +8,9 @@
 #define PCH_H
 
 // add headers that you want to pre-compile here
-#include "FractalGenerator.hpp"
+#include "Image.h"
+#include "Colour.h"
+#include "FractalAlgo.h"
+#include "CoordHelper.h"
 
 #endif //PCH_H

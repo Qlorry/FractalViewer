@@ -1,21 +1,21 @@
 #include "pch.h"
 
-#include "Mandelbrot.hpp"
+#include "Mandelbrot.h"
 
+#include <string>
+#include <sstream>
 #include <complex>
 
-using namespace std;
-
-int Mandelbrot::getIter(double x0, double y0)
+int Mandelbrot::ProcessCoord(const DataCoord& coord) const
 {
 	int iter = 0;
 	auto x = 0.0;
 	auto y = 0.0;
 
-	while (x * x + y * y <= 2 * 2 && iter < MAX_ITER)
+	while (x * x + y * y <= 2 * 2 && iter < max_iterations)
 	{
-		auto xtemp = x * x - y * y + x0;
-		y = 2 * x * y + y0;
+		auto xtemp = x * x - y * y + coord.x;
+		y = 2 * x * y + coord.y;
 		x = xtemp;
 		iter++;
 	}
@@ -23,7 +23,7 @@ int Mandelbrot::getIter(double x0, double y0)
 	return iter;
 }
 
-boost::compute::function<int(DataCoord)> Mandelbrot::GetProcFuncGPU()
+boost::compute::function<int(DataCoord)> Mandelbrot::GetProcessCoordGPU() const 
 {
 	static bool ready = false;
 	static auto func = boost::compute::make_function_from_source<int(DataCoord c)>(
@@ -35,13 +35,13 @@ boost::compute::function<int(DataCoord)> Mandelbrot::GetProcFuncGPU()
 	{
 		std::ostringstream oss;
 		oss << R"(
-		int MandelbrotProcFunc(DataCoord c0)
+		int MandelbrotDataCoordFunc(DataCoord c0)
 		{
 			int iter = 0;
 			double x = 0.0;
 			double y = 0.0;
 
-			while (x * x + y * y <= 2 * 2 && iter < )" << MAX_ITER << R"()
+			while (x * x + y * y <= 2 * 2 && iter < )" << max_iterations << R"()
 			{
 				double xtemp = x * x - y * y + c0.x;
 				y = 2 * x * y + c0.y;
@@ -55,7 +55,7 @@ boost::compute::function<int(DataCoord)> Mandelbrot::GetProcFuncGPU()
 
 		const std::string src = oss.str();
 		func = boost::compute::make_function_from_source<int(DataCoord c)>(
-				"MandelbrotProcFunc",
+				"MandelbrotDataCoordFunc",
 				src
 				);
 		ready = true;

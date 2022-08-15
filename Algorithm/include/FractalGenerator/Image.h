@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Colour.hpp"
+#include "Colour.h"
 #include <iterator>
 
 template <class T>

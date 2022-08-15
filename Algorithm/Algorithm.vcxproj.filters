@@ -9,21 +9,21 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
     </Filter>
+    <Filter Include="Algorithms">
+      <UniqueIdentifier>{62e9b2b8-81ea-419f-93d1-28fa3410c565}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\FractalGenerator\Mandelbrot.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="include\FractalGenerator\Colour.hpp">
+    <ClInclude Include="include\FractalGenerator\Colour.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\FractalGenerator\CoordHelper.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="include\FractalGenerator\FractalGenerator.hpp">
+    <ClInclude Include="include\FractalGenerator\FractalGenerator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="include\FractalGenerator\FractalParams.h">
@@ -37,6 +37,15 @@
     </ClInclude>
     <ClInclude Include="include\FractalGenerator\Image.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FractalGenerator\CPUService.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FractalGenerator\Mandelbrot.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
+    <ClInclude Include="include\FractalGenerator\FractalAlgo.h">
+      <Filter>Algorithms</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -61,8 +70,11 @@
     <ClCompile Include="src\Image.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Mandelbrot.cpp">
+    <ClCompile Include="src\CPUService.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Mandelbrot.cpp">
+      <Filter>Algorithms</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

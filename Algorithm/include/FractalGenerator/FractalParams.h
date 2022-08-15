@@ -1,5 +1,5 @@
 #pragma once
-#include "Colour.hpp"
+#include "Colour.h"
 
 #include <vector>
 struct FractalParams
@@ -16,5 +16,7 @@ struct FractalParams
     std::vector<std::pair<float, Colour>> colours;
 
     bool use_gpu{ true };
+
+    bool use_custom_func{ false };
 };
 

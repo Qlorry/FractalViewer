@@ -1,5 +1,5 @@
 #pragma once
-#include "Colour.hpp"
+#include "Colour.h"
 #include <vector>
 class Histogram
 {

@@ -268,9 +268,6 @@ copy  /Y fonts\Roboto-Medium.ttf ..\bin\fonts\</Command>
   <ItemGroup>
     <ResourceCompile Include="FractalViewer.rc" />
   </ItemGroup>
-  <ItemGroup>
-    <Image Include="FracIcon.png" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

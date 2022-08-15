@@ -6,7 +6,7 @@
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
 
 #include "FractalGenerator/Image.h"
-#include "FractalGenerator/FractalGenerator.hpp"
+#include "FractalGenerator/FractalGenerator.h"
 
 class ImageWindow
 {

@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "GPUService.h"
 
-#include "CoordHelper.h"
-#include "Mandelbrot.hpp"
-
 #include <vector>
 #include <algorithm>
 #include <iostream>
@@ -79,13 +76,13 @@ std::string GPUService::GetDevice()
     return m_device.name();
 }
 
-ColourImage GPUService::GenerateImage(const FractalParams& p)
+ColourImage GPUService::GenerateImage(const FractalParams& p, const FractalAlgo* alg)
 {
+    m_alg = alg;
     auto coords = CalculateCoordImage(p);
-
     auto result_data = CalculateDataImage(coords, p);
 
-    std::vector<int> histogram(Mandelbrot::MAX_ITER + 1);
+    std::vector<int> histogram(m_alg->GetMaxIterations() + 1);
     DataImage img(p.width, p.heigth);
     for (size_t y = 0u; y < p.heigth; y++) {
         for (size_t x = 0u; x < p.width; x++) {
@@ -96,13 +93,14 @@ ColourImage GPUService::GenerateImage(const FractalParams& p)
 
     auto the_thing = CalculateColours(p, result_data.second, histogram);
 
+    m_alg = nullptr;
     return the_thing;
 }
 
 compute::vector<DataCoord> GPUService::CalculateCoordImage(const FractalParams& p)
 {
     using namespace std::chrono;
-    auto s1 = high_resolution_clock::now();
+    const auto s1 = high_resolution_clock::now();
 
     std::vector<ImageCoord> input;
     input.reserve(p.heigth * p.width);
@@ -112,7 +110,7 @@ compute::vector<DataCoord> GPUService::CalculateCoordImage(const FractalParams& 
             input.push_back({ x, y });
         }
     } 
-    auto s2 = high_resolution_clock::now();
+    const auto s2 = high_resolution_clock::now();
 
     compute::vector<ImageCoord> input_gpu(input.size(), m_context);
     compute::vector<DataCoord> res_gpu(input.size(), m_context);
@@ -121,8 +119,8 @@ compute::vector<DataCoord> GPUService::CalculateCoordImage(const FractalParams& 
     compute::copy(
         input.begin(), input.end(), input_gpu.begin(), m_queue
     );
-    auto s3 = high_resolution_clock::now();
-    auto f = CoordHelper::GetImg2DataGPU(p);
+    const auto s3 = high_resolution_clock::now();
+    const auto f = CoordHelper::GetImg2DataGPU(p);
 
     // calculate the square-root of each element in-place
     compute::transform(
@@ -133,7 +131,7 @@ compute::vector<DataCoord> GPUService::CalculateCoordImage(const FractalParams& 
         m_queue
     );
 
-    auto s4 = high_resolution_clock::now();
+    const auto s4 = high_resolution_clock::now();
     std::cout << __func__ << " Setup took: " << duration_cast<milliseconds>(s2 - s1).count() << " ms\n";
     std::cout << __func__ << " Copy took: " << duration_cast<milliseconds>(s3 - s2).count() << " ms\n";
     std::cout << __func__ << " Transform took: " << duration_cast<milliseconds>(s4 - s3).count() << " ms\n";
@@ -146,7 +144,7 @@ std::pair<std::vector<int>, compute::vector<int>> GPUService::CalculateDataImage
     auto s1 = high_resolution_clock::now();
     compute::vector<int> res_data_gpu(input.size(), m_context);
 
-    auto f = Mandelbrot::GetProcFuncGPU();
+    auto f = m_alg->GetProcessCoordGPU();
 
     // calculate the square-root of each element in-place
     compute::transform(
@@ -208,7 +206,7 @@ compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const Frac
 
     for (auto& c : p.colours)
     {
-        range_cpu.push_back(c.first * Mandelbrot::MAX_ITER);
+        range_cpu.push_back(c.first * m_alg->GetMaxIterations());
         numOfRanges_cpu.push_back(0);
         colours_cpu.push_back({ c.second.r, c.second.g, c.second.b, 0 });
     }
@@ -217,7 +215,7 @@ compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const Frac
     auto fut_col = compute::copy_async(colours_cpu.begin(), colours_cpu.end(), colours_gpu.begin(), m_queue);
 
     int rangeIndex = 0;
-    for (int i = 0; i < Mandelbrot::MAX_ITER; i++)
+    for (int i = 0; i < m_alg->GetMaxIterations(); i++)
     {
         int pixels = histogram_cpu[i];
 
@@ -239,9 +237,9 @@ compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const Frac
 
     compute::vector<int> ranges_size_and_max_iter(m_context);
     ranges_size_and_max_iter.push_back(colours_gpu.size());
-    ranges_size_and_max_iter.push_back(Mandelbrot::MAX_ITER);
+    ranges_size_and_max_iter.push_back(m_alg->GetMaxIterations());
 
-    compute::vector<boost::compute::uchar4_> palette_gpu(Mandelbrot::MAX_ITER + 1, m_context);
+    compute::vector<boost::compute::uchar4_> palette_gpu(m_alg->GetMaxIterations() + 1, m_context);
 
     fut_col.wait();
     fut_range.wait();
@@ -254,7 +252,7 @@ compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const Frac
     calculate_palette_kernel.set_arg(3, histogram_gpu.get_buffer());
     calculate_palette_kernel.set_arg(4, ranges_size_and_max_iter.get_buffer());
     calculate_palette_kernel.set_arg(5, palette_gpu.get_buffer());
-    m_queue.enqueue_1d_range_kernel(calculate_palette_kernel, 0, Mandelbrot::MAX_ITER+1, 0);
+    m_queue.enqueue_1d_range_kernel(calculate_palette_kernel, 0, m_alg->GetMaxIterations() +1, 0);
 
     return palette_gpu;
 }
