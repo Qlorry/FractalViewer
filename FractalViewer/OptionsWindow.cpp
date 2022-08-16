@@ -6,10 +6,7 @@ OptionsWindow::OptionsWindow() :
 {
 	m_wnd_flags |= ImGuiWindowFlags_NoCollapse;
 
-	m_formula_text[0] = '1';
-	m_formula_text[1] = '2';
-	m_formula_text[2] = '3';
-	m_formula_text[3] = '\0';
+	strcpy_s(m_formula_text.data(), example_code.size() + 1, example_code.c_str());
 }
 
 FractalParams OptionsWindow::Render(FractalParams prev, const std::string& device_name, bool params_changed)
@@ -17,7 +14,8 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 	static double x_zoom = prev.zoom_x;
 	static double y_zoom = prev.zoom_y;
 	static bool use_gpu = prev.use_gpu;
-	static bool equalize_zooms = false;
+	static bool use_custom_code = false;
+	static bool equalize_zooms = true;
 	static std::vector<std::pair<int, std::array<float, 3>>> percent_colours;
 
 	if (percent_colours.size() != prev.colours.size())
@@ -37,6 +35,42 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 	}
 
 	ImGui::Begin("Fractal Settings", nullptr, m_wnd_flags);
+	ImGui::Checkbox("Use user defined algorithm", &use_custom_code);
+
+	if (use_custom_code)
+	{
+		static ImGuiInputTextFlags flags = ImGuiInputTextFlags_AllowTabInput;
+
+
+		//ImGui::CheckboxFlags("ImGuiInputTextFlags_ReadOnly", &flags, ImGuiInputTextFlags_ReadOnly);
+		//ImGui::CheckboxFlags("ImGuiInputTextFlags_AllowTabInput", &flags, ImGuiInputTextFlags_AllowTabInput);
+		//ImGui::CheckboxFlags("ImGuiInputTextFlags_CtrlEnterForNewLine", &flags, ImGuiInputTextFlags_CtrlEnterForNewLine);
+		ImGui::InputTextMultiline("Custom Code", m_formula_text.data(), m_formula_text.size(), ImVec2(-FLT_MIN, ImGui::GetTextLineHeight() * max_code_lines), flags);
+
+		if (ImGui::Button("Use"))
+		{
+			prev.use_custom_func = true;
+			prev.custom_func_code = std::string(m_formula_text.data());
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("Reset"))
+		{
+			strcpy_s(m_formula_text.data(), example_code.size() + 1, example_code.c_str());
+		}
+		ImGui::SameLine();
+		ImGui::TextDisabled("(?)");
+		if (ImGui::IsItemHovered())
+		{
+			ImGui::BeginTooltip();
+			ImGui::PushTextWrapPos(ImGui::GetFontSize() * 35.0f);
+			ImGui::TextUnformatted(instuctions);
+			ImGui::PopTextWrapPos();
+			ImGui::EndTooltip();
+		}
+	}
+	ImGui::Spacing();
+	ImGui::Spacing();
+	ImGui::Spacing();
 
 	ImGui::InputDouble("Input zoom x", &x_zoom, 10.f, 100.0f, "%.0f");
 	if (!equalize_zooms)

@@ -9,7 +9,7 @@ public:
     Mandelbrot() = default;
     ~Mandelbrot() = default;
         
-    int ProcessCoord(const DataCoord& coord) const override;
-    boost::compute::function<int(DataCoord)> GetProcessCoordGPU() const override;
+    int ProcessCoord(const DataCoord& coord) override;
+    boost::compute::function<int(DataCoord)> GetProcessCoordGPU() override;
 };
 

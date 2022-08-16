@@ -47,6 +47,9 @@
     <ClInclude Include="include\FractalGenerator\FractalAlgo.h">
       <Filter>Algorithms</Filter>
     </ClInclude>
+    <ClInclude Include="include\FractalGenerator\UserDefinedAlgo.h">
+      <Filter>Algorithms</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="pch.cpp">
@@ -74,6 +77,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\Mandelbrot.cpp">
+      <Filter>Algorithms</Filter>
+    </ClCompile>
+    <ClCompile Include="src\UserDefinedAlgo.cpp">
       <Filter>Algorithms</Filter>
     </ClCompile>
   </ItemGroup>

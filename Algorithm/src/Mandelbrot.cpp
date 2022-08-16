@@ -6,7 +6,7 @@
 #include <sstream>
 #include <complex>
 
-int Mandelbrot::ProcessCoord(const DataCoord& coord) const
+int Mandelbrot::ProcessCoord(const DataCoord& coord)
 {
 	int iter = 0;
 	auto x = 0.0;
@@ -23,7 +23,7 @@ int Mandelbrot::ProcessCoord(const DataCoord& coord) const
 	return iter;
 }
 
-boost::compute::function<int(DataCoord)> Mandelbrot::GetProcessCoordGPU() const 
+boost::compute::function<int(DataCoord)> Mandelbrot::GetProcessCoordGPU() 
 {
 	static bool ready = false;
 	static auto func = boost::compute::make_function_from_source<int(DataCoord c)>(

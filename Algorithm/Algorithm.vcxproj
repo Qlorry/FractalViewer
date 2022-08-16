@@ -222,6 +222,7 @@
     <ClInclude Include="include\FractalGenerator\Histogram.h" />
     <ClInclude Include="include\FractalGenerator\Image.h" />
     <ClInclude Include="include\FractalGenerator\Mandelbrot.h" />
+    <ClInclude Include="include\FractalGenerator\UserDefinedAlgo.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -241,6 +242,7 @@
     <ClCompile Include="src\Histogram.cpp" />
     <ClCompile Include="src\Image.cpp" />
     <ClCompile Include="src\Mandelbrot.cpp" />
+    <ClCompile Include="src\UserDefinedAlgo.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

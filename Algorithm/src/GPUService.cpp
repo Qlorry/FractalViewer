@@ -12,8 +12,9 @@
 namespace
 {
     constexpr auto calculate_palette_func_name = "calculate_palette";
-    constexpr auto calculate_palette_source = BOOST_COMPUTE_STRINGIZE_SOURCE(
-        kernel void calculate_palette(
+    const std::string calculate_palette_source =
+compute::type_definition<DataCoord>() +
+R"( kernel void calculate_palette(
             global float* range,
             global int* numOfRanges,
             global uchar4 * colours,
@@ -58,8 +59,8 @@ namespace
             result.z = startColor.z + ((colorDiff.z * (double)totalPixels) / rangeTotal);
         }
         palette[it] = result;
-    });
-
+    };
+)";
     constexpr auto calculate_colours_func_name = "calculate_colours";
 
 }
@@ -76,7 +77,7 @@ std::string GPUService::GetDevice()
     return m_device.name();
 }
 
-ColourImage GPUService::GenerateImage(const FractalParams& p, const FractalAlgo* alg)
+ColourImage GPUService::GenerateImage(const FractalParams& p, FractalAlgo* alg)
 {
     m_alg = alg;
     auto coords = CalculateCoordImage(p);
@@ -261,6 +262,7 @@ std::vector<Colour> GPUService::CalculateImageColours(const FractalParams& p, co
 {
     const auto image_size = p.width * p.heigth;
     compute::vector<boost::compute::uchar4_> image_gpu(image_size, m_context);
+    compute::kernel k;
 
     boost::optional<compute::program> calculate_colours_program = m_cache.get(calculate_colours_func_name);
     if (!calculate_colours_program) {
@@ -273,7 +275,6 @@ std::vector<Colour> GPUService::CalculateImageColours(const FractalParams& p, co
             size_t it = get_global_id(0);
             image[it] = palette[data[it]];
         });
-
 
         // create and build square program
         calculate_colours_program = compute::program::build_with_source(source, m_context);

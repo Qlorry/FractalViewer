@@ -7,6 +7,7 @@
 #include "FractalParams.h"
 #include "GPUService.h"
 #include "CPUService.h"
+#include "UserDefinedAlgo.h"
 
 class FractalGenerator {
 public:
@@ -19,4 +20,5 @@ private:
 
     GPUService m_gpu_generator;
     CPUService m_cpu_generator;
+    UserDefinedAlgo m_user_alg;
 };

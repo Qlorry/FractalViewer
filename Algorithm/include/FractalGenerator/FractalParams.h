@@ -2,6 +2,8 @@
 #include "Colour.h"
 
 #include <vector>
+#include <string>
+
 struct FractalParams
 {
     size_t width;
@@ -18,5 +20,6 @@ struct FractalParams
     bool use_gpu{ true };
 
     bool use_custom_func{ false };
+    std::string custom_func_code;
 };
 

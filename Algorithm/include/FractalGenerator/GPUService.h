@@ -13,7 +13,7 @@ class GPUService
 {
 public:
 	GPUService();
-	ColourImage GenerateImage(const FractalParams& p, const FractalAlgo* alg);
+	ColourImage GenerateImage(const FractalParams& p, FractalAlgo* alg);
 	std::string GetDevice();
 private:
 	compute::vector<DataCoord> CalculateCoordImage(const FractalParams& p);
@@ -23,7 +23,7 @@ private:
 	compute::vector<boost::compute::uchar4_> CalculatePalette(const FractalParams& p, const std::vector<int>& histogram_cpu);
 	std::vector<Colour> CalculateImageColours(const FractalParams& p, const compute::vector<int>& data_gpu, const compute::vector<boost::compute::uchar4_>& palette_gpu);
 
-	const FractalAlgo* m_alg;
+	FractalAlgo* m_alg;
 
 	compute::device m_device;
 	compute::context m_context;

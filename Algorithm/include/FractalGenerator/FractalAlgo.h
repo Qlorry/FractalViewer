@@ -9,8 +9,8 @@ public:
     FractalAlgo() = default;
     virtual ~FractalAlgo() = default;
 
-    virtual int ProcessCoord(const DataCoord& coord) const = 0;
-    virtual boost::compute::function<int(DataCoord)> GetProcessCoordGPU() const = 0;
+    virtual int ProcessCoord(const DataCoord& coord) = 0;
+    virtual boost::compute::function<int(DataCoord)> GetProcessCoordGPU() = 0;
     virtual int GetMaxIterations() const { return max_iterations; }
 protected:
     int max_iterations = 1000;
