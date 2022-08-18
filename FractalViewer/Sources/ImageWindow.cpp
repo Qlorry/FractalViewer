@@ -28,7 +28,7 @@ ImageWindow::ImageWindow() :
 	m_wnd_flags |= ImGuiWindowFlags_NoScrollbar;
 	m_wnd_flags |= ImGuiWindowFlags_NoNav;
 
-	m_frac_params.x = -400;
+	m_frac_params.x = -400.;
 
 	m_frac_params.colours.emplace_back(0.0f, Colour(0, 0, 255));
 	m_frac_params.colours.emplace_back(0.05f, Colour(255, 150, 0));
@@ -99,9 +99,29 @@ void ImageWindow::Render(FractalParams p, bool& changed_params)
 	if (is_shift_pressed)
 		move_mod = 15.;
 	if (is_ctrl_pressed)
-		move_mod = 5.;
+		move_mod = 1.;
 	bool active = ImGui::IsWindowFocused();
 	bool params_changed = false;
+	if ((std::abs(m_frac_params.zoom_x - p.zoom_x) > std::numeric_limits<float>::epsilon() ||
+		std::abs(m_frac_params.zoom_y - p.zoom_y) > std::numeric_limits<float>::epsilon()) &&
+		p.zoom_x > 0 && p.zoom_y > 0)
+	{
+		params_changed = true;
+		auto x_scale = p.zoom_x / m_frac_params.zoom_x;
+		auto y_scale = p.zoom_y / m_frac_params.zoom_y;
+
+		m_frac_params.x *= x_scale;
+		m_frac_params.y *= y_scale;
+		m_frac_params.zoom_x = p.zoom_x;
+		m_frac_params.zoom_y = p.zoom_y;
+	}
+	else if (std::abs(m_frac_params.x - p.x) > std::numeric_limits<float>::epsilon() ||
+		std::abs(m_frac_params.y - p.y) > std::numeric_limits<float>::epsilon())
+	{
+		params_changed = true;
+		m_frac_params.x = p.x;
+		m_frac_params.y = p.y;
+	}
 	if (m_frac_params.use_gpu != p.use_gpu)
 	{
 		params_changed = true;
@@ -118,42 +138,52 @@ void ImageWindow::Render(FractalParams p, bool& changed_params)
 		if (std::abs(io.MouseWheel) > std::numeric_limits<float>::epsilon())
 		{
 			params_changed = true;
-			auto one_percent_x = m_frac_params.zoom_x / 100;
-			auto one_percent_y = m_frac_params.zoom_y / 100;
-			auto new_zoom_x = m_frac_params.zoom_x + one_percent_x * 10. * io.MouseWheel;
-			auto new_zoom_y = m_frac_params.zoom_y + one_percent_y * 10. * io.MouseWheel;
+			//auto one_percent_x = m_frac_params.zoom_x / 100;
+			//auto one_percent_y = m_frac_params.zoom_y / 100;
+			//auto new_zoom_x = m_frac_params.zoom_x + one_percent_x * 10. * std::round(io.MouseWheel);
+			//auto new_zoom_y = m_frac_params.zoom_y + one_percent_y * 10. * std::round(io.MouseWheel);
 
-			auto x_scale = new_zoom_x / m_frac_params.zoom_x;
-			auto y_scale = new_zoom_y / m_frac_params.zoom_y;
+			auto x_scale = 1.1;//new_zoom_x / m_frac_params.zoom_x;
+			auto y_scale = 1.1;//new_zoom_y / m_frac_params.zoom_y;
 
-			m_frac_params.x *= x_scale;
-			m_frac_params.y *= y_scale;
-			m_frac_params.zoom_x = new_zoom_x;
-			m_frac_params.zoom_y = new_zoom_y;
+			if (io.MouseWheel < 0)
+			{
+				m_frac_params.zoom_x /= x_scale;
+				m_frac_params.zoom_y /= y_scale;
+				m_frac_params.x /= x_scale;
+				m_frac_params.y /= y_scale;
+			}
+			else
+			{
+				m_frac_params.zoom_x *= x_scale;
+				m_frac_params.zoom_y *= y_scale;
+				m_frac_params.x *= x_scale;
+				m_frac_params.y *= y_scale;
+			}
 		}
 		if (ImGui::IsKeyDown(down_arr) || ImGui::IsKeyDown(s_key))
 		{
 			params_changed = true;
-			auto one_pr = std::abs(m_frac_params.y) / 100.;
-			m_frac_params.y += 10 + one_pr * move_mod;
+			auto one_pr = image_size.y / 100.;
+			m_frac_params.y += one_pr * move_mod;
 		}
 		if (ImGui::IsKeyDown(up_arr) || ImGui::IsKeyDown(w_key))
 		{
 			params_changed = true;
-			auto one_pr = std::abs(m_frac_params.y) / 100.;
-			m_frac_params.y -= 10 + one_pr * move_mod;
+			auto one_pr = image_size.y / 100.;
+			m_frac_params.y -= one_pr * move_mod;
 		}
 		if (ImGui::IsKeyDown(left_arr) || ImGui::IsKeyDown(a_key))
 		{
 			params_changed = true;
-			auto one_pr = std::abs(m_frac_params.x) / 100.;
-			m_frac_params.x -= 1 + one_pr * move_mod;
+			auto one_pr = image_size.x / 100.;
+			m_frac_params.x -= one_pr * move_mod;
 		}
 		if (ImGui::IsKeyDown(right_arr) || ImGui::IsKeyDown(d_key))
 		{
 			params_changed = true;
-			auto one_pr = std::abs(m_frac_params.x) / 100.;
-			m_frac_params.x += 1 + one_pr * move_mod;
+			auto one_pr = image_size.x / 100.;
+			m_frac_params.x += one_pr * move_mod;
 		}
 	}
 	if (m_frac_params.use_custom_func != p.use_custom_func || (p.use_custom_func && m_frac_params.custom_func_code != p.custom_func_code))

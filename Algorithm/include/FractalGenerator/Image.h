@@ -70,6 +70,8 @@ public:
 
     void Reset();
     void Resize(size_t width, size_t heigth);
+    size_t GetWidth() const { return m_width; }
+    size_t GetHeigth() const { return m_heigth; }
 
     Image<T> operator=(Image<T>&) = delete;
     Image<T>& operator=(Image<T>&& other);
