@@ -18,15 +18,15 @@ namespace
 compute::type_definition<DataCoord>() +
 R"( kernel void calculate_palette(
             global float* range,
-            global int* numOfRanges,
+            global size_t* numOfRanges,
             global uchar4 * colours,
-            global int* histogram,
-            global int* ranges_size_and_max_iter,
+            global size_t* histogram,
+            global size_t* ranges_size_and_max_iter,
             global uchar4 * palette)
     {
         size_t it = get_global_id(0);
-        int ranges_size = ranges_size_and_max_iter[0];
-        int max_iter = ranges_size_and_max_iter[1];
+        size_t ranges_size = ranges_size_and_max_iter[0];
+        size_t max_iter = ranges_size_and_max_iter[1];
         uchar4 result;
         result.x = 37;
         result.y = 37;
@@ -53,7 +53,7 @@ R"( kernel void calculate_palette(
             colorDiff.y = endColor.y - startColor.y;
             colorDiff.z = endColor.z - startColor.z;
 
-            int totalPixels = 0;
+            size_t totalPixels = 0;
             for (int i = rangeStart; i <= it; i++) { totalPixels += histogram[i]; }
 
             result.x = startColor.x + ((colorDiff.x * (double)totalPixels) / rangeTotal);
@@ -85,7 +85,7 @@ ColourImage GPUService::GenerateImage(const FractalParams& p, FractalAlgo* alg)
     auto coords = CalculateCoordImage(p);
     auto result_data = CalculateDataImage(coords, p);
 
-    std::vector<int> histogram(m_alg->GetMaxIterations() + 1);
+    std::vector<size_t> histogram(m_alg->GetMaxIterations() + 1);
     for (size_t y = 0u; y < p.heigth; y++) {
         for (size_t x = 0u; x < p.width; x++) {
             histogram[result_data.first[y * p.width + x]]++;
@@ -106,8 +106,8 @@ compute::vector<DataCoord> GPUService::CalculateCoordImage(const FractalParams& 
     std::vector<ImageCoord> input;
     input.reserve(p.heigth * p.width);
 
-    for (unsigned int y = 0u; y < p.heigth; y++) {
-        for (unsigned int x = 0u; x < p.width; x++) {
+    for (size_t y = 0u; y < p.heigth; y++) {
+        for (size_t x = 0u; x < p.width; x++) {
             input.push_back({ x, y });
         }
     } 
@@ -139,15 +139,14 @@ compute::vector<DataCoord> GPUService::CalculateCoordImage(const FractalParams& 
     return res_gpu;
 }
 
-std::pair<std::vector<int>, compute::vector<int>> GPUService::CalculateDataImage(compute::vector<DataCoord>& input, const FractalParams& p)
+std::pair<std::vector<unsigned int>, compute::vector<unsigned int>> GPUService::CalculateDataImage(compute::vector<DataCoord>& input, const FractalParams& p)
 {
     using namespace std::chrono;
     auto s1 = high_resolution_clock::now();
-    compute::vector<int> res_data_gpu(input.size(), m_context);
+    compute::vector<unsigned int> res_data_gpu(input.size(), m_context);
 
     auto f = m_alg->GetProcessCoordGPU();
 
-    // calculate the square-root of each element in-place
     compute::transform(
         input.begin(),
         input.end(),
@@ -156,7 +155,7 @@ std::pair<std::vector<int>, compute::vector<int>> GPUService::CalculateDataImage
         m_queue
     );
 
-    std::vector<int> result_data(res_data_gpu.size());
+    std::vector<unsigned int> result_data(res_data_gpu.size());
     compute::copy(
         res_data_gpu.begin(), res_data_gpu.end(), result_data.begin(), m_queue
     );
@@ -166,11 +165,11 @@ std::pair<std::vector<int>, compute::vector<int>> GPUService::CalculateDataImage
     return { std::move(result_data), std::move(res_data_gpu) };
 }
 
-ColourImage GPUService::CalculateColours(const FractalParams& p, const compute::vector<int>& data, const std::vector<int>& histogram)
+ColourImage GPUService::CalculateColours(const FractalParams& p, const compute::vector<unsigned int>& data, const std::vector<size_t>& histogram)
 {
     ColourImage image(p.width, p.heigth);
 
-    std::vector<int> data_cpu(data.size());
+    std::vector<unsigned int> data_cpu(data.size());
     auto fut = compute::copy_async(data.begin(), data.end(), data_cpu.begin(), m_queue);
     auto palette_gpu = CalculatePalette(p, histogram);
     fut.wait();
@@ -180,11 +179,11 @@ ColourImage GPUService::CalculateColours(const FractalParams& p, const compute::
     std::vector<std::future<void>> futures;
     futures.reserve(p.heigth);
 
-    for (unsigned int y = 0u; y < p.heigth; y++)
+    for (size_t y = 0u; y < p.heigth; y++)
     {
         futures.push_back(
         std::async([&image, &data_cpu, &palette_cpu, y, width = p.width]() {
-                for (unsigned int x = 0u; x < width; x++)
+                for (size_t x = 0u; x < width; x++)
                 {
                     const auto& current = data_cpu[y * width + x];
                     *image.at(y, x) = Colour(palette_cpu[current].x, palette_cpu[current].y, palette_cpu[current].z);
@@ -198,19 +197,19 @@ ColourImage GPUService::CalculateColours(const FractalParams& p, const compute::
     return image;
 }
 
-compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const FractalParams& p, const std::vector<int>& histogram_cpu)
+compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const FractalParams& p, const std::vector<size_t>& histogram_cpu)
 {
     std::vector<float> range_cpu;
-    std::vector<int> numOfRanges_cpu;
+    std::vector<size_t> numOfRanges_cpu;
     std::vector<boost::compute::uchar4_> colours_cpu;
     range_cpu.reserve(p.colours.size());
     numOfRanges_cpu.reserve(p.colours.size());
     colours_cpu.reserve(p.colours.size());
     
     compute::vector<float> range_gpu(p.colours.size(), m_context);
-    compute::vector<int> numOfRanges_gpu(p.colours.size(), m_context);
+    compute::vector<size_t> numOfRanges_gpu(p.colours.size(), m_context);
     compute::vector<boost::compute::uchar4_> colours_gpu(p.colours.size(), m_context);
-    compute::vector<int> histogram_gpu(histogram_cpu.size(), m_context);
+    compute::vector<size_t> histogram_gpu(histogram_cpu.size(), m_context);
 
     auto fut_hist = compute::copy_async(histogram_cpu.begin(), histogram_cpu.end(), histogram_gpu.begin(), m_queue);
 
@@ -225,7 +224,7 @@ compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const Frac
     auto fut_col = compute::copy_async(colours_cpu.begin(), colours_cpu.end(), colours_gpu.begin(), m_queue);
 
     int rangeIndex = 0;
-    for (int i = 0; i < m_alg->GetMaxIterations(); i++)
+    for (unsigned int i = 0u; i < m_alg->GetMaxIterations(); i++)
     {
         int pixels = histogram_cpu[i];
 
@@ -245,7 +244,7 @@ compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const Frac
     // create square kernel
     compute::kernel calculate_palette_kernel(calculate_palette_program.get(), calculate_palette_func_name);
 
-    compute::vector<int> ranges_size_and_max_iter(m_context);
+    compute::vector<size_t> ranges_size_and_max_iter(m_context);
     ranges_size_and_max_iter.push_back(colours_gpu.size());
     ranges_size_and_max_iter.push_back(m_alg->GetMaxIterations());
 
@@ -267,7 +266,7 @@ compute::vector<boost::compute::uchar4_> GPUService::CalculatePalette(const Frac
     return palette_gpu;
 }
 
-std::vector<Colour> GPUService::CalculateImageColours(const FractalParams& p, const compute::vector<int>& data_gpu, const compute::vector<boost::compute::uchar4_>& palette_gpu)
+std::vector<Colour> GPUService::CalculateImageColours(const FractalParams& p, const compute::vector<unsigned int>& data_gpu, const compute::vector<boost::compute::uchar4_>& palette_gpu)
 {
     const auto image_size = p.width * p.heigth;
     compute::vector<boost::compute::uchar4_> image_gpu(image_size, m_context);
@@ -278,7 +277,7 @@ std::vector<Colour> GPUService::CalculateImageColours(const FractalParams& p, co
         const char source[] = BOOST_COMPUTE_STRINGIZE_SOURCE(
             kernel void calculate_colours(
                 global uchar4 * palette,
-                global int* data,
+                global unsigned int* data,
                 global uchar4* image)
         {
             size_t it = get_global_id(0);

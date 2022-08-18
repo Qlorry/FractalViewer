@@ -51,8 +51,8 @@ void CPUService::CalculateHistogram()
 
 void CPUService::CalculateData(const FractalParams& p)
 {
-	for (unsigned int y = 0u; y < p.heigth; y++) {
-		for (unsigned int x = 0u; x < p.width; x++) {
+	for (size_t y = 0u; y < p.heigth; y++) {
+		for (size_t x = 0u; x < p.width; x++) {
 			auto coord = CoordHelper::Img2Data({ x, y }, p);
 			*m_data_img.at(y, x) = m_mandelbrot_alg.ProcessCoord(coord);
 		}
@@ -62,7 +62,7 @@ void CPUService::CalculateData(const FractalParams& p)
 void CPUService::CalculateImage(const FractalParams& p)
 {
 	std::vector<float> range;
-	std::vector<int> numOfRanges;
+	std::vector<size_t> numOfRanges;
 	for (auto& c : p.colours)
 	{
 		range.push_back(c.first * m_mandelbrot_alg.GetMaxIterations());
@@ -70,7 +70,7 @@ void CPUService::CalculateImage(const FractalParams& p)
 	}
 
 	int rangeIndex = 0;
-	for (int i = 0; i < m_mandelbrot_alg.GetMaxIterations(); i++)
+	for (unsigned int i = 0; i < m_mandelbrot_alg.GetMaxIterations(); i++)
 	{
 		int pixels = m_histogram[i];
 
@@ -79,9 +79,9 @@ void CPUService::CalculateImage(const FractalParams& p)
 		numOfRanges[rangeIndex] += pixels;
 	}
 
-	const auto GetRange = [&](int value)
+	const auto GetRange = [&](unsigned int value)
 	{
-		int ran = 0;
+		unsigned int ran = 0;
 
 		for (int i = 1; i < range.size(); i++)
 		{
@@ -92,21 +92,21 @@ void CPUService::CalculateImage(const FractalParams& p)
 	};
 
 	m_palette.resize(m_mandelbrot_alg.GetMaxIterations() + 1);
-	for (int it = 0; it <= m_mandelbrot_alg.GetMaxIterations(); it++)
+	for (unsigned int it = 0; it <= m_mandelbrot_alg.GetMaxIterations(); it++)
 	{
 		Colour result(37, 37, 37);
 
 		if (it != m_mandelbrot_alg.GetMaxIterations())
 		{
 			auto ran = GetRange(it);
-			int rangeTotal = numOfRanges[ran];
+			auto rangeTotal = numOfRanges[ran];
 			int rangeStart = range[ran];
 
 			auto startColor = p.colours[ran].second;
 			auto endColor = ran + 1 >= p.colours.size() ? Colour(0, 0, 0) : p.colours[ran + 1].second;
 			Colour colorDiff = endColor - startColor;
 
-			int totalPixels = 0;
+			size_t totalPixels = 0;
 			for (int i = rangeStart; i <= it; i++) { totalPixels += m_histogram[i]; }
 
 			result.r = startColor.r + ((colorDiff.r * (double)totalPixels) / rangeTotal);
@@ -116,11 +116,11 @@ void CPUService::CalculateImage(const FractalParams& p)
 		m_palette[it] = result;
 	}
 
-	for (unsigned int y = 0u; y < p.heigth; y++)
+	for (size_t y = 0u; y < p.heigth; y++)
 	{
-		for (unsigned int x = 0u; x < p.width; x++)
+		for (size_t x = 0u; x < p.width; x++)
 		{
-			int it = *m_data_img.at(y, x);
+			unsigned int it = *m_data_img.at(y, x);
 			*m_image.at(y, x) = m_palette[it];
 		}
 	}

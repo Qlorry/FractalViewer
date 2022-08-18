@@ -18,6 +18,6 @@ private:
     std::vector<Colour> m_palette;
     ColourImage m_image;
     DataImage m_data_img;
-    std::vector<int> m_histogram;
+    std::vector<size_t> m_histogram;
 };
 

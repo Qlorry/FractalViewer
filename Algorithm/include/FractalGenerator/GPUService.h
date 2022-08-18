@@ -17,11 +17,11 @@ public:
 	std::string GetDevice();
 private:
 	compute::vector<DataCoord> CalculateCoordImage(const FractalParams& p);
-	std::pair<std::vector<int>, compute::vector<int>> CalculateDataImage(compute::vector<DataCoord>& input, const FractalParams& p);
-	ColourImage CalculateColours(const FractalParams& p, const compute::vector<int>& data, const std::vector<int>& histogram);
+	std::pair<std::vector<unsigned int>, compute::vector<unsigned int>> CalculateDataImage(compute::vector<DataCoord>& input, const FractalParams& p);
+	ColourImage CalculateColours(const FractalParams& p, const compute::vector<unsigned int>& data, const std::vector<size_t>& histogram);
 	
-	compute::vector<boost::compute::uchar4_> CalculatePalette(const FractalParams& p, const std::vector<int>& histogram_cpu);
-	std::vector<Colour> CalculateImageColours(const FractalParams& p, const compute::vector<int>& data_gpu, const compute::vector<boost::compute::uchar4_>& palette_gpu);
+	compute::vector<boost::compute::uchar4_> CalculatePalette(const FractalParams& p, const std::vector<size_t>& histogram_cpu);
+	std::vector<Colour> CalculateImageColours(const FractalParams& p, const compute::vector<unsigned int>& data_gpu, const compute::vector<boost::compute::uchar4_>& palette_gpu);
 
 	FractalAlgo* m_alg;
 

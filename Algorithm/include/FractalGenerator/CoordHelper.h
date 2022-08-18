@@ -14,8 +14,8 @@ struct DataCoord
 
 struct ImageCoord
 {
-	unsigned int x;
-	unsigned int y;
+	size_t x;
+	size_t y;
 };
 
 BOOST_COMPUTE_ADAPT_STRUCT(DataCoord, DataCoord, (x, y))

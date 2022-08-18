@@ -8,8 +8,8 @@ public:
     UserDefinedAlgo(std::string code);
     ~UserDefinedAlgo() = default;
 
-    int ProcessCoord(const DataCoord& coord) override;
-    boost::compute::function<int(DataCoord)> GetProcessCoordGPU() override;
+    unsigned int ProcessCoord(const DataCoord& coord) override;
+    boost::compute::function<unsigned int(DataCoord)> GetProcessCoordGPU() override;
 
     bool IsFunctionValid() { return m_is_valid; }
     void UpdateFunctionCode(const std::string& code);

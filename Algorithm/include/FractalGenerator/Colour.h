@@ -20,9 +20,9 @@ struct Colour {
     
     void SetFromFltArr(const std::array<float, 3>& input)
     {
-        r = input[0] * 255.f;
-        g = input[1] * 255.f;
-        b = input[2] * 255.f;
+        r = static_cast<unsigned char>(input[0] * 255.f);
+        g = static_cast<unsigned char>(input[1] * 255.f);
+        b = static_cast<unsigned char>(input[2] * 255.f);
     }
 
     friend bool operator==(const Colour& f, const Colour& s)

@@ -10,14 +10,14 @@ UserDefinedAlgo::UserDefinedAlgo(std::string code) : m_code(std::move(code))
 	ValidateFunction();
 }
 
-int UserDefinedAlgo::ProcessCoord(const DataCoord& coord)
+unsigned int UserDefinedAlgo::ProcessCoord(const DataCoord& coord)
 {
 	return 0;
 }
 
-boost::compute::function<int(DataCoord)> UserDefinedAlgo::GetProcessCoordGPU()
+boost::compute::function<unsigned int(DataCoord)> UserDefinedAlgo::GetProcessCoordGPU()
 {
-	static auto func = boost::compute::make_function_from_source<int(DataCoord c)>(
+	static auto func = boost::compute::make_function_from_source<unsigned int(DataCoord c)>(
 		"UserProcFunc",
 		""
 		);
@@ -26,9 +26,9 @@ boost::compute::function<int(DataCoord)> UserDefinedAlgo::GetProcessCoordGPU()
 	{
 		std::ostringstream oss;
 		oss << R"(
-		int UserProcFunc(DataCoord coordinate)
+		unsigned int UserProcFunc(DataCoord coordinate)
 		{
-			int iteration = 0;
+			unsigned int iteration = 0;
 			double x = 0.0;
 			double y = 0.0;
 
@@ -45,7 +45,7 @@ boost::compute::function<int(DataCoord)> UserDefinedAlgo::GetProcessCoordGPU()
 		)";
 
 		const std::string src = oss.str();
-		func = boost::compute::make_function_from_source<int(DataCoord c)>(
+		func = boost::compute::make_function_from_source<unsigned int(DataCoord c)>(
 			"UserProcFunc",
 			src
 			);

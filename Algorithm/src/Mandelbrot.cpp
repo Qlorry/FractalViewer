@@ -6,9 +6,9 @@
 #include <sstream>
 #include <complex>
 
-int Mandelbrot::ProcessCoord(const DataCoord& coord)
+unsigned int Mandelbrot::ProcessCoord(const DataCoord& coord)
 {
-	int iter = 0;
+	unsigned int iter = 0;
 	auto x = 0.0;
 	auto y = 0.0;
 
@@ -23,10 +23,10 @@ int Mandelbrot::ProcessCoord(const DataCoord& coord)
 	return iter;
 }
 
-boost::compute::function<int(DataCoord)> Mandelbrot::GetProcessCoordGPU() 
+boost::compute::function<unsigned int(DataCoord)> Mandelbrot::GetProcessCoordGPU()
 {
 	static bool ready = false;
-	static auto func = boost::compute::make_function_from_source<int(DataCoord c)>(
+	static auto func = boost::compute::make_function_from_source<unsigned int(DataCoord c)>(
 		"MandelbrotProcFunc", 
 		""
 		);
@@ -35,9 +35,9 @@ boost::compute::function<int(DataCoord)> Mandelbrot::GetProcessCoordGPU()
 	{
 		std::ostringstream oss;
 		oss << R"(
-		int MandelbrotDataCoordFunc(DataCoord c0)
+		unsigned int MandelbrotDataCoordFunc(DataCoord c0)
 		{
-			int iter = 0;
+			unsigned int iter = 0;
 			double x = 0.0;
 			double y = 0.0;
 
@@ -54,7 +54,7 @@ boost::compute::function<int(DataCoord)> Mandelbrot::GetProcessCoordGPU()
 		)";
 
 		const std::string src = oss.str();
-		func = boost::compute::make_function_from_source<int(DataCoord c)>(
+		func = boost::compute::make_function_from_source<unsigned int(DataCoord c)>(
 				"MandelbrotDataCoordFunc",
 				src
 				);

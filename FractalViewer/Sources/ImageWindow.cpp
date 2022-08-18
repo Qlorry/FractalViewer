@@ -207,10 +207,10 @@ void ImageWindow::Render(FractalParams p, bool& changed_params)
 	}
 	if (!m_img.IsValid() || m_frac_params.heigth != image_size.y || m_frac_params.width != image_size.x || params_changed)
 	{
-		m_frac_params.heigth = image_size.y;
-		m_frac_params.width = image_size.x;
+		m_frac_params.heigth = static_cast<size_t>(image_size.y);
+		m_frac_params.width = static_cast<size_t>(image_size.x);
 		m_img = std::move(m_generator.GenerateImage(m_frac_params));
-		LoadTexture(image_size.x, image_size.y);
+		LoadTexture(static_cast<int>(image_size.x), static_cast<int>(image_size.y));
 	}
 	changed_params = params_changed;
 

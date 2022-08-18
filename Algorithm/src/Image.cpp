@@ -67,4 +67,4 @@ Image<T>& Image<T>::operator=(Image<T>&& other)
 }
 
 template class Image<Colour>;
-template class Image<int>;
+template class Image<unsigned int>;

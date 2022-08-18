@@ -6,8 +6,8 @@
 
 struct FractalParams
 {
-    size_t width;
-    size_t heigth;
+    size_t width{ 0u };
+    size_t heigth{ 0u };
 
     double x{ 0. };
     double y{ 0. };

@@ -90,4 +90,4 @@ private:
 };
 
 typedef Image<Colour> ColourImage;
-typedef Image<int> DataImage;
+typedef Image<unsigned int> DataImage;
