@@ -1,6 +1,8 @@
 #include "OptionsWindow.h"
 #include <FractalGenerator/FractalGenerator.h>
 //#include <FractalGenerator/FractalParams.h>
+#include <thread>
+#include <future>
 
 OptionsWindow::OptionsWindow() :
 	m_wnd_flags(0)
@@ -41,6 +43,18 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 
 	ImGui::Begin("Fractal Settings", nullptr, m_wnd_flags);
 
+	ImGui::Checkbox("Use GPU", &use_gpu);
+	if (use_gpu)
+	{
+		ImGui::Dummy({ 20, 10 });
+		ImGui::SameLine();
+		ImGui::Text(std::string("Running on: " + device_name).c_str());
+	}
+
+	ImGui::Spacing();
+	ImGui::Spacing();
+	ImGui::Spacing();
+
 	if (ImGui::CollapsingHeader("Coordinates"))
 	{
 		ImGui::InputDouble("X coordinate", &x_coord, 10.f, 100.0f, "%.5f");
@@ -68,18 +82,6 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 			ImGui::ColorEdit3(label_col_edit.c_str(), col.data());
 		}
 	}
-
-	ImGui::Checkbox("Use GPU", &use_gpu);
-	if (use_gpu)
-	{
-		ImGui::Dummy({ 20, 10 });
-		ImGui::SameLine();
-		ImGui::Text(std::string("Running on: " + device_name).c_str());
-	}
-
-	ImGui::Spacing();
-	ImGui::Spacing();
-	ImGui::Spacing();
 
 	static bool apply_on_fly = false;
 	if (ImGui::Button("Apply") || apply_on_fly || ImGui::IsKeyDown(525))
@@ -136,19 +138,29 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 	{
 		static int w = prev.width * 4;
 		static int h = prev.heigth * 4;
-		w = prev.width * 4;
-		h = prev.heigth * 4;
-		static std::string name;
-		name.resize(250);
+		static bool name_set = false;
+		static char name[250];
+		static std::future<void> process_indicator;
+		if (!name_set)
+		{
+			std::promise<void> p;
+			p.set_value();
+			process_indicator = p.get_future();
+			strcpy(name, "SuperImage");
+			name_set = true;
+		}
 
 		ImGui::InputInt("Horizontal size", &w);
 		ImGui::InputInt("Vertical size", &h);
-		ImGui::InputText("Filename", name.data(), 250);
-		if (ImGui::Button("Run"))
+		ImGui::InputText("Filename", name, 250);
+
+		std::string name_str(name);
+		if (process_indicator.wait_for(std::chrono::seconds(0)) != std::future_status::ready)
+			ImGui::Text("Exporting...");
+		else
 		{
-			if (!name.empty())
+			if (ImGui::Button("Run") && !name_str.empty())
 			{
-				FractalGenerator serv;
 				auto temp = prev;
 				temp.width = w;
 				temp.heigth = h;
@@ -156,8 +168,24 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 				temp.zoom_x *= (w / prev.width);
 				temp.zoom_y *= (h / prev.heigth);
 
-				auto img = serv.GenerateImage(temp);
-				serv.ExportImage(img, name);
+				temp.x *= (w / prev.width);
+				temp.y *= (h / prev.heigth);
+
+				const auto export_func = [temp, name_str]() {
+					FractalGenerator serv;
+					auto img = serv.GenerateImage(temp);
+					serv.ExportImage(img, name_str);
+				};
+
+				process_indicator = std::async(export_func);
+			}
+
+			ImGui::SameLine();
+			if (ImGui::Button("Reset"))
+			{
+				w = prev.width * 4;
+				h = prev.heigth * 4;
+				strcpy(name, "SuperImage");
 			}
 		}
 	}

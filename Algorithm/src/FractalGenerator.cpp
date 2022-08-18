@@ -35,7 +35,7 @@ ColourImage FractalGenerator::GenerateImage(FractalParams p)
 	}
 }
 
-void FractalGenerator::ExportImage(ColourImage& img, const std::string& filename)
+void FractalGenerator::ExportImage(ColourImage& img, std::string filename)
 {
 	boost::gil::rgb8_image_t export_img(img.GetWidth(), img.GetHeigth());
 	auto v = boost::gil::view(export_img);

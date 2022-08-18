@@ -14,7 +14,7 @@ public:
 
     FractalGenerator();
     ColourImage GenerateImage(FractalParams p);
-    void ExportImage(ColourImage& img, const std::string& filename);
+    void ExportImage(ColourImage& img, std::string filename);
 
     std::string GetDevice() { return m_gpu_generator.GetDevice(); };
 private:
