@@ -4,6 +4,8 @@
 #include <vector>
 #include <algorithm>
 #include <iostream>
+#include <thread>
+#include <future>
 
 #include <boost/compute/types/struct.hpp>
 #include <boost/compute/utility/source.hpp>
@@ -84,10 +86,8 @@ ColourImage GPUService::GenerateImage(const FractalParams& p, FractalAlgo* alg)
     auto result_data = CalculateDataImage(coords, p);
 
     std::vector<int> histogram(m_alg->GetMaxIterations() + 1);
-    DataImage img(p.width, p.heigth);
     for (size_t y = 0u; y < p.heigth; y++) {
         for (size_t x = 0u; x < p.width; x++) {
-            *img.at(y, x) = result_data.first[y * p.width + x];
             histogram[result_data.first[y * p.width + x]]++;
         }
     }
@@ -177,15 +177,24 @@ ColourImage GPUService::CalculateColours(const FractalParams& p, const compute::
 
     std::vector<boost::compute::uchar4_> palette_cpu(palette_gpu.size());
     compute::copy(palette_gpu.begin(), palette_gpu.end(), palette_cpu.begin(), m_queue);
+    std::vector<std::future<void>> futures;
+    futures.reserve(p.heigth);
 
     for (unsigned int y = 0u; y < p.heigth; y++)
     {
-        for (unsigned int x = 0u; x < p.width; x++)
-        {
-            const auto& current = data_cpu[y * p.width + x];
-            *image.at(y, x) = Colour(palette_cpu[current].x, palette_cpu[current].y, palette_cpu[current].z);
-        }
+        futures.push_back(
+        std::async([&image, &data_cpu, &palette_cpu, y, width = p.width]() {
+                for (unsigned int x = 0u; x < width; x++)
+                {
+                    const auto& current = data_cpu[y * width + x];
+                    *image.at(y, x) = Colour(palette_cpu[current].x, palette_cpu[current].y, palette_cpu[current].z);
+                }
+            })
+        );
     }
+    for (const auto& f : futures)
+        f.wait();
+
     return image;
 }
 

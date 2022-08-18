@@ -1,4 +1,5 @@
 #include "ImageWindow.h"
+#include <future>
 
 namespace
 {
@@ -45,21 +46,33 @@ bool ImageWindow::LoadTexture(int image_width, int image_height)
 	auto size = image_width * image_height * 4;
 	unsigned char* image_data = new unsigned char[size];
 
-	auto it = m_img.begin();
-	for (auto i = 0; i < size; i += 4, it++)
-	{
-		auto r = image_data + i;
-		auto g = image_data + i + 1;
-		auto b = image_data + i + 2;
-		auto a = image_data + i + 3;
-
-		*r = it->r;
-		*g = it->g;
-		*b = it->b;
-		*a = 255;
-	}
 	if (image_data == NULL)
 		return false;
+
+	std::vector<std::future<void>> futures;
+	futures.reserve(image_height);
+
+	for (size_t y = 0u; y < image_height; y++)
+	{
+		futures.push_back(
+			std::async([this, data = (image_data + (y* image_width*4)), y, width = image_width]() {
+			for (size_t x = 0; x < width * 4; x+=4)
+			{
+				auto r = data + x;
+				auto g = data + x + 1;
+				auto b = data + x + 2;
+				auto a = data + x + 3;
+				auto it = m_img.at(y, x/4);
+				*r = it->r;
+				*g = it->g;
+				*b = it->b;
+				*a = 255;
+			}
+		})
+		);
+	}
+	for (const auto& f : futures)
+		f.wait();
 
 	if(m_texture_valid)
 		glDeleteTextures(1, &m_image_texture);
