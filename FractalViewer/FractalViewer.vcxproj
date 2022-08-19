@@ -98,6 +98,9 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Label="Vcpkg" Condition="'$(Configuration)|$(Platform)'=='Deploy|x64'">
+    <VcpkgConfiguration>Release</VcpkgConfiguration>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -163,6 +166,9 @@ copy /Y FracIcon.png ..\bin\
 copy /Y FracIcon.png $(SolutionDir)$(Platform)\$(Configuration)\
 copy /Y $(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName).exe ..\bin\
 copy /Y $(SolutionDir)$(Platform)\$(Configuration)\OpenCL.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\boost*.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\libpng*.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\zlib*.dll ..\bin\
 mkdir $(SolutionDir)$(Platform)\$(Configuration)\fonts\
 copy  /Y fonts\Roboto-Medium.ttf $(SolutionDir)$(Platform)\$(Configuration)\fonts\
 mkdir ..\bin\fonts\
@@ -194,6 +200,9 @@ copy /Y FracIcon.png ..\bin\
 copy /Y FracIcon.png $(SolutionDir)$(Platform)\$(Configuration)\
 copy /Y $(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName).exe ..\bin\
 copy /Y $(SolutionDir)$(Platform)\$(Configuration)\OpenCL.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\boost*.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\libpng*.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\zlib*.dll ..\bin\
 mkdir $(SolutionDir)$(Platform)\$(Configuration)\fonts\
 copy  /Y fonts\Roboto-Medium.ttf $(SolutionDir)$(Platform)\$(Configuration)\fonts\
 mkdir ..\bin\fonts\
@@ -225,6 +234,9 @@ copy /Y FracIcon.png ..\bin\
 copy /Y FracIcon.png $(SolutionDir)$(Platform)\$(Configuration)\
 copy /Y $(SolutionDir)$(Platform)\$(Configuration)\$(ProjectName).exe ..\bin\
 copy /Y $(SolutionDir)$(Platform)\$(Configuration)\OpenCL.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\boost*.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\libpng*.dll ..\bin\
+copy /Y $(SolutionDir)$(Platform)\$(Configuration)\zlib*.dll ..\bin\
 mkdir $(SolutionDir)$(Platform)\$(Configuration)\fonts\
 copy  /Y fonts\Roboto-Medium.ttf $(SolutionDir)$(Platform)\$(Configuration)\fonts\
 mkdir ..\bin\fonts\
@@ -239,9 +251,9 @@ copy  /Y fonts\Roboto-Medium.ttf ..\bin\fonts\</Command>
     <ClCompile Include="..\imgui\imgui_draw.cpp" />
     <ClCompile Include="..\imgui\imgui_tables.cpp" />
     <ClCompile Include="..\imgui\imgui_widgets.cpp" />
-    <ClCompile Include="OptionsWindow.cpp" />
     <ClCompile Include="Sources\FractalViewer.cpp" />
     <ClCompile Include="Sources\ImageWindow.cpp" />
+    <ClCompile Include="Sources\OptionsWindow.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\imgui\backends\imgui_impl_glfw.h" />
@@ -267,6 +279,10 @@ copy  /Y fonts\Roboto-Medium.ttf ..\bin\fonts\</Command>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="FractalViewer.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="FracIcon.png" />
+    <Image Include="icon1.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

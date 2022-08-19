@@ -228,7 +228,7 @@ compute::vector<Colour> GPUService::CalculatePalette(const FractalParams& p, con
     int rangeIndex = 0;
     for (unsigned int i = 0u; i < m_alg->GetMaxIterations(); i++)
     {
-        int pixels = histogram_cpu[i];
+        size_t pixels = histogram_cpu[i];
 
         if (i >= range_cpu[rangeIndex + 1]) { rangeIndex++; }
 

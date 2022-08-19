@@ -72,7 +72,7 @@ void CPUService::CalculateImage(const FractalParams& p)
 	int rangeIndex = 0;
 	for (unsigned int i = 0; i < m_mandelbrot_alg.GetMaxIterations(); i++)
 	{
-		int pixels = m_histogram[i];
+		size_t pixels = m_histogram[i];
 
 		if (i >= range[rangeIndex + 1]) { rangeIndex++; }
 
@@ -100,14 +100,14 @@ void CPUService::CalculateImage(const FractalParams& p)
 		{
 			auto ran = GetRange(it);
 			auto rangeTotal = numOfRanges[ran];
-			int rangeStart = range[ran];
+			float rangeStart = range[ran];
 
 			auto startColor = p.colours[ran].second;
 			auto endColor = ran + 1 >= p.colours.size() ? Colour(0, 0, 0) : p.colours[ran + 1].second;
 			Colour colorDiff = endColor - startColor;
 
 			size_t totalPixels = 0;
-			for (int i = rangeStart; i <= it; i++) { totalPixels += m_histogram[i]; }
+			for (unsigned int i = rangeStart; i <= it; i++) { totalPixels += m_histogram[i]; }
 
 			result.r = startColor.r + ((colorDiff.r * (double)totalPixels) / rangeTotal);
 			result.g = startColor.g + ((colorDiff.g * (double)totalPixels) / rangeTotal);
