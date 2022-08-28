@@ -25,7 +25,7 @@ boost::compute::function<unsigned int(DataCoord)> UserDefinedAlgo::GetProcessCoo
 	if (!m_is_function_ready)
 	{
 		std::ostringstream oss;
-		oss << R"(
+		oss << std::setprecision(12) << R"(
 		unsigned int UserProcFunc(DataCoord coordinate)
 		{
 			unsigned int iteration = 0;

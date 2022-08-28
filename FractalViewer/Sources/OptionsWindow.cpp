@@ -57,8 +57,8 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 
 	if (ImGui::CollapsingHeader("Coordinates"))
 	{
-		ImGui::InputDouble("X coordinate", &x_coord, 10.f, 100.0f, "%.5f");
-		ImGui::InputDouble("Y coordinate", &y_coord, 10.f, 100.0f, "%.5f");
+		ImGui::InputDouble("X coordinate", &x_coord, 0.01f, 0.1f, "%.12f");
+		ImGui::InputDouble("Y coordinate", &y_coord, 0.01f, 0.1f, "%.12f");
 	}
 
 	if (ImGui::CollapsingHeader("Zoom"))
@@ -136,8 +136,8 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 	}
 	if (ImGui::CollapsingHeader("Export image"))
 	{
-		static int w = prev.width * 4;
-		static int h = prev.heigth * 4;
+		static int w = prev.width * 2;
+		static int h = prev.heigth * 2;
 		static bool name_set = false;
 		static char name[250];
 		static std::future<void> process_indicator;
@@ -152,6 +152,38 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 
 		ImGui::InputInt("Horizontal size", &w);
 		ImGui::InputInt("Vertical size", &h);
+		if (ImGui::Button("1x"))
+		{
+			w = prev.width;
+			h = prev.heigth;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("2x"))
+		{
+			w = prev.width * 2;
+			h = prev.heigth * 2;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("3x"))
+		{
+			w = prev.width * 3;
+			h = prev.heigth * 3;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("5x"))
+		{
+			w = prev.width * 5;
+			h = prev.heigth * 5;
+		}
+		ImGui::SameLine();
+		if (ImGui::Button("10x"))
+		{
+			w = prev.width * 10;
+			h = prev.heigth * 10;
+		}
+		ImGui::SameLine();
+		ImGui::Text("Current size");
+
 		ImGui::InputText("Filename", name, 250);
 
 		std::string name_str(name);
@@ -167,9 +199,6 @@ FractalParams OptionsWindow::Render(FractalParams prev, const std::string& devic
 
 				temp.zoom_x *= (w / prev.width);
 				temp.zoom_y *= (h / prev.heigth);
-
-				temp.x *= (w / prev.width);
-				temp.y *= (h / prev.heigth);
 
 				const auto export_func = [temp, name_str]() {
 					FractalGenerator serv;

@@ -29,15 +29,15 @@ ImageWindow::ImageWindow() :
 	m_wnd_flags |= ImGuiWindowFlags_NoScrollbar;
 	m_wnd_flags |= ImGuiWindowFlags_NoNav;
 
-	m_frac_params.x = -400.;
+	m_frac_params.x = -0.6;
 
 	m_frac_params.colours.emplace_back(0.0f, Colour(0, 0, 255));
 	m_frac_params.colours.emplace_back(0.05f, Colour(255, 150, 0));
 	m_frac_params.colours.emplace_back(0.9f, Colour(255, 240, 80));
 	m_frac_params.colours.emplace_back(1.f,  Colour(255, 255, 89));
 
-	m_frac_params.zoom_x = 450.;
-	m_frac_params.zoom_y = 450.;
+	m_frac_params.zoom_x = 350.;
+	m_frac_params.zoom_y = 350.;
 	m_frac_params.use_gpu = true;
 }
 
@@ -123,8 +123,6 @@ void ImageWindow::Render(FractalParams p, bool& changed_params)
 		auto x_scale = p.zoom_x / m_frac_params.zoom_x;
 		auto y_scale = p.zoom_y / m_frac_params.zoom_y;
 
-		m_frac_params.x *= x_scale;
-		m_frac_params.y *= y_scale;
 		m_frac_params.zoom_x = p.zoom_x;
 		m_frac_params.zoom_y = p.zoom_y;
 	}
@@ -151,52 +149,45 @@ void ImageWindow::Render(FractalParams p, bool& changed_params)
 		if (std::abs(io.MouseWheel) > std::numeric_limits<float>::epsilon())
 		{
 			params_changed = true;
-			//auto one_percent_x = m_frac_params.zoom_x / 100;
-			//auto one_percent_y = m_frac_params.zoom_y / 100;
-			//auto new_zoom_x = m_frac_params.zoom_x + one_percent_x * 10. * std::round(io.MouseWheel);
-			//auto new_zoom_y = m_frac_params.zoom_y + one_percent_y * 10. * std::round(io.MouseWheel);
 
-			auto x_scale = 1.1;//new_zoom_x / m_frac_params.zoom_x;
-			auto y_scale = 1.1;//new_zoom_y / m_frac_params.zoom_y;
+			auto x_scale = 1.1;
+			auto y_scale = 1.1;
 
 			if (io.MouseWheel < 0)
 			{
 				m_frac_params.zoom_x /= x_scale;
 				m_frac_params.zoom_y /= y_scale;
-				m_frac_params.x /= x_scale;
-				m_frac_params.y /= y_scale;
 			}
 			else
 			{
 				m_frac_params.zoom_x *= x_scale;
 				m_frac_params.zoom_y *= y_scale;
-				m_frac_params.x *= x_scale;
-				m_frac_params.y *= y_scale;
 			}
 		}
+		
 		if (ImGui::IsKeyDown(down_arr) || ImGui::IsKeyDown(s_key))
 		{
 			params_changed = true;
 			auto one_pr = image_size.y / 100.;
-			m_frac_params.y += one_pr * move_mod;
+			m_frac_params.y += (one_pr * move_mod) / m_frac_params.zoom_y;
 		}
 		if (ImGui::IsKeyDown(up_arr) || ImGui::IsKeyDown(w_key))
 		{
 			params_changed = true;
 			auto one_pr = image_size.y / 100.;
-			m_frac_params.y -= one_pr * move_mod;
+			m_frac_params.y -= (one_pr * move_mod) / m_frac_params.zoom_y;
 		}
 		if (ImGui::IsKeyDown(left_arr) || ImGui::IsKeyDown(a_key))
 		{
 			params_changed = true;
 			auto one_pr = image_size.x / 100.;
-			m_frac_params.x -= one_pr * move_mod;
+			m_frac_params.x -= (one_pr * move_mod) / m_frac_params.zoom_x;
 		}
 		if (ImGui::IsKeyDown(right_arr) || ImGui::IsKeyDown(d_key))
 		{
 			params_changed = true;
 			auto one_pr = image_size.x / 100.;
-			m_frac_params.x += one_pr * move_mod;
+			m_frac_params.x += (one_pr * move_mod) / m_frac_params.zoom_x;
 		}
 	}
 	if (m_frac_params.use_custom_func != p.use_custom_func || (p.use_custom_func && m_frac_params.custom_func_code != p.custom_func_code))

@@ -34,7 +34,7 @@ boost::compute::function<unsigned int(DataCoord)> Mandelbrot::GetProcessCoordGPU
 	if (!ready)
 	{
 		std::ostringstream oss;
-		oss << R"(
+		oss << std::setprecision(12) << R"(
 		unsigned int MandelbrotDataCoordFunc(DataCoord c0)
 		{
 			unsigned int iter = 0;
